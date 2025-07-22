@@ -16,6 +16,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: HomeScreen(),
+      routes: {
+        '/report': (context) => ReportScreen(),
+        '/createUser': (context) => CreateUserScreen(), 
+      }
     );
   }
 }
@@ -71,4 +75,37 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+class ReportScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Simple list of dummy reports
+    final reports = ['Sales Report', 'User Report', 'Error Logs'];
+
+    return Scaffold(
+      appBar: AppBar(title: Text("Reports")),
+      body: ListView.builder(
+        itemCount: reports.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            leading: Icon(Icons.description),
+            title: Text(reports[index]),
+          );
+        },
+      ),
+    );
+  }
+}
+class CreateUserScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Just a placeholder for now
+    return Scaffold(
+      appBar: AppBar(title: Text("Create User")),
+      body: Center(
+        child: Text("Create User Form goes here"),
+      ),
+    );
+  }
+}
+
 
