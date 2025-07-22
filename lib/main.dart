@@ -15,76 +15,60 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const CombinedScreen(),
+      home: HomeScreen(),
     );
   }
 }
-
-// 🔍 Search bar widget
-class SearchBarWidget extends StatelessWidget {
-  const SearchBarWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-            ),
-          ],
-        ),
-        child: const TextField(
-          decoration: InputDecoration(
-            hintText: 'Search',
-            border: InputBorder.none,
-            icon: Icon(Icons.search, color: Colors.grey),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// 📝 Hello World widget
-class HelloWorldWidget extends StatelessWidget {
-  const HelloWorldWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Hello World',
-        style: TextStyle(fontSize: 24),
-      ),
-    );
-  }
-}
-
-// 📦 Combines both widgets
-class CombinedScreen extends StatelessWidget {
-  const CombinedScreen({super.key});
+ 
+class HomeScreen extends StatelessWidget {
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hello World App'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      backgroundColor: Colors.white,
-      body: Column(
-        children: const [
-          SearchBarWidget(),
-          Expanded(child: HelloWorldWidget()),
-        ],
+      appBar: AppBar(title: Text("Home")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // 🔍 Search Bar
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Search...',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+            SizedBox(height: 16),
+
+            // 🔘 Two Buttons in a Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/report');
+                    },
+                    child: Text("Report"),
+                  ),
+                ),
+                SizedBox(width: 16), // Space between buttons
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/createUser');
+                    },
+                    child: Text("Create User"),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
