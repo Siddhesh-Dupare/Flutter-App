@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(const MyApp());
@@ -18,19 +20,67 @@ class MyApp extends StatelessWidget {
       home: HomeScreen(),
       routes: {
         '/report': (context) => ReportScreen(),
-        '/createUser': (context) => CreateUserScreen(), 
-      }
+        '/createUser': (context) => CreateUserScreen(),
+      },
     );
   }
 }
- 
-class HomeScreen extends StatelessWidget {
+
+class HomeScreen extends StatefulWidget {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  List<Map<String, String>> users = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRandomUsers();
+  }
+
+  Future<void> fetchRandomUsers() async {
+    setState(() => isLoading = true);
+
+    final response =
+        await http.get(Uri.parse('https://randomuser.me/api/?results=20'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = data['results'] as List;
+
+      setState(() {
+        users = results
+        .map((user) => {
+              'name':
+                  '${user['name']['title'] as String} ${user['name']['first'] as String} ${user['name']['last'] as String}',
+              'email': user['email'] as String,
+              'picture': user['picture']['thumbnail'] as String,
+        })
+      .toList();
+  isLoading = false;
+});
+
+    } else {
+      throw Exception('Failed to load users');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Home")),
+      appBar: AppBar(
+        title: Text("Home"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: fetchRandomUsers,
+          )
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -58,7 +108,7 @@ class HomeScreen extends StatelessWidget {
                     child: Text("Report"),
                   ),
                 ),
-                SizedBox(width: 16), // Space between buttons
+                SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
@@ -69,16 +119,40 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
+            SizedBox(height: 16),
+
+            // 👤 List of Random Users
+            Expanded(
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: users.length,
+                      itemBuilder: (context, index) {
+                        final user = users[index];
+                        return Card(
+                          elevation: 3,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: NetworkImage(user['picture']!),
+                            ),
+                            title: Text(user['name']!),
+                            subtitle: Text(user['email']!),
+                          ),
+                        );
+                      },
+                    ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
 class ReportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Simple list of dummy reports
     final reports = ['Sales Report', 'User Report', 'Error Logs'];
 
     return Scaffold(
@@ -95,10 +169,10 @@ class ReportScreen extends StatelessWidget {
     );
   }
 }
+
 class CreateUserScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Just a placeholder for now
     return Scaffold(
       appBar: AppBar(title: Text("Create User")),
       body: Center(
@@ -107,5 +181,3 @@ class CreateUserScreen extends StatelessWidget {
     );
   }
 }
-
-
