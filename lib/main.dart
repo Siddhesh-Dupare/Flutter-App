@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -148,6 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+  
 }
 
 class ReportScreen extends StatelessWidget {
@@ -170,13 +174,109 @@ class ReportScreen extends StatelessWidget {
   }
 }
 
-class CreateUserScreen extends StatelessWidget {
+ class CreateUserScreen extends StatefulWidget {
+  @override
+  _CreateUserScreenState createState() => _CreateUserScreenState();
+}
+
+class _CreateUserScreenState extends State<CreateUserScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _departmentController = TextEditingController();
+
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("User created successfully!")),
+      );
+
+      // Clear fields
+      _nameController.clear();
+      _emailController.clear();
+      _ageController.clear();
+      _departmentController.clear();
+      setState(() {
+        _profileImage = null;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Create User")),
-      body: Center(
-        child: Text("Create User Form goes here"),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              Text("Profile Photo", style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              GestureDetector(
+                onTap: _pickImage,
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage:
+                      _profileImage != null ? FileImage(_profileImage!) : null,
+                  child: _profileImage == null
+                      ? Icon(Icons.camera_alt, size: 30)
+                      : null,
+                ),
+              ),
+              SizedBox(height: 24),
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: "Name"),
+                validator: (value) =>
+                    value!.isEmpty ? "Enter name" : null,
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(labelText: "Email"),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) =>
+                    value!.isEmpty ? "Enter email" : null,
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _ageController,
+                decoration: InputDecoration(labelText: "Age"),
+                keyboardType: TextInputType.number,
+                validator: (value) =>
+                    value!.isEmpty ? "Enter age" : null,
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _departmentController,
+                decoration: InputDecoration(labelText: "Department"),
+                validator: (value) =>
+                    value!.isEmpty ? "Enter department" : null,
+              ),
+              SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: _submitForm,
+                child: Text("Submit"),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
